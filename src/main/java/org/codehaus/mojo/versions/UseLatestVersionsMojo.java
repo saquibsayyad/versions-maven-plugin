@@ -92,11 +92,18 @@ public class UseLatestVersionsMojo
         {
             if ( getProject().getDependencyManagement() != null && isProcessingDependencyManagement() )
             {
-                DependencyManagement dependencyManagement =
-                    PomHelper.getRawModel( getProject() ).getDependencyManagement();
-                if ( dependencyManagement != null )
-                {
-                    useLatestVersions( pom, dependencyManagement.getDependencies() );
+                DependencyManagement dependencyManagement = getProject().getDependencyManagement();
+                DependencyManagement rawDependencies = PomHelper.getRawModel(getProject()).getDependencyManagement();
+
+                if( rawDependencies != null ) {
+                    for(Dependency rawDependency: rawDependencies.getDependencies()) {
+                        for(Dependency dependency: dependencyManagement.getDependencies()) {
+                            if(dependency.getArtifactId().equals(rawDependency.getArtifactId()) && dependency.getGroupId().equals(rawDependency.getGroupId())) {
+                                rawDependency.setVersion(dependency.getVersion());
+                            }
+                        }
+                    }
+                    useLatestVersions( pom, rawDependencies.getDependencies() );
                 }
             }
             if ( getProject().getDependencies() != null && isProcessingDependencies() )
